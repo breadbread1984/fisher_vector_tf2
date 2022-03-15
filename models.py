@@ -15,7 +15,7 @@ class GMM(tf.keras.layers.Layer):
     gmm = tfp.distributions.Mixture(
       cat = tfp.distributions.Categorical(probs = self.cats),
       components = [
-        tfp.distributions.Normal(loc = self.locs[i], scale = self.scales[i]) for i in range(self.kernel_num)
+        tfp.distributions.MultivariateNormalDiag(loc = self.locs[i], scale_diag = self.scales[i]) for i in range(self.kernel_num)
       ]);
     return gmm.prob(inputs);
   def get_config(self,):
@@ -29,6 +29,6 @@ class GMM(tf.keras.layers.Layer):
 if __name__ == "__main__":
   gmm = GMM(3);
   import numpy as np;
-  inputs = np.random.normal(size = (10));
+  inputs = np.random.normal(size = (2,10));
   probs = gmm(inputs);
   print(probs.shape)

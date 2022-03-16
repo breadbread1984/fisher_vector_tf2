@@ -9,7 +9,7 @@ class GMMLayer(tf.keras.layers.Layer):
     super(GMMLayer, self).__init__(**kwargs);
   def build(self, input_shape):
     self.cats = self.add_weight(shape = (self.kernel_num, ), dtype = tf.float32, trainable = True, initializer = tf.keras.initializers.Constant(1./self.kernel_num), name = 'cats');
-    self.locs = self.add_weight(shape = [self.kernel_num,] + list(input_shape)[1:], dtype = tf.float32, trainable = True, name = 'locs');
+    self.locs = self.add_weight(shape = [self.kernel_num,] + list(input_shape)[1:], dtype = tf.float32, trainable = True, initializer = tf.keras.initializers.RandomNormal(), name = 'locs');
     self.scales = self.add_weight(shape = [self.kernel_num,] + list(input_shape)[1:], dtype = tf.float32, trainable = True, initializer = tf.keras.initializers.Constant(.1), name = 'scales');
   def call(self, inputs):
     gmm = tfp.distributions.Mixture(
@@ -34,7 +34,7 @@ def GMM(input_shape, kernel_num = 3):
 
 def fisher_kernel(kernel_num = 3, dim = 10):
   gmm = GMM((dim,), kernel_num);
-  inputs = tf.random.normal(loc = 5., scale = 3., shape = (1,dim,));
+  inputs = tf.random.normal(shape = (1,dim,));
   with tf.GradientTape() as g:
     outputs = gmm(inputs); # log p(x)
   grads = g.gradient(outputs, gmm.trainable_variables);

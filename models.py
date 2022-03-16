@@ -6,7 +6,7 @@ import tensorflow_probability as tfp;
 class GMMLayer(tf.keras.layers.Layer):
   def __init__(self, kernel_num = 3, **kwargs):
     self.kernel_num = kernel_num;
-    super(GMM, self).__init__(**kwargs);
+    super(GMMLayer, self).__init__(**kwargs);
   def build(self, input_shape):
     self.cats = self.add_weight(shape = (self.kernel_num, ), dtype = tf.float32, trainable = True, initializer = tf.keras.initializers.Constant(1./self.kernel_num), name = 'cats');
     self.locs = self.add_weight(shape = [self.kernel_num,] + list(input_shape)[1:], dtype = tf.float32, trainable = True, name = 'locs');
@@ -19,7 +19,7 @@ class GMMLayer(tf.keras.layers.Layer):
       ]);
     return gmm.prob(inputs);
   def get_config(self,):
-    config = super(GMM, self).get_config();
+    config = super(GMMLayer, self).get_config();
     config['kernel_num'] = self.kernel_num;
     return config;
   @classmethod

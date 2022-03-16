@@ -17,7 +17,7 @@ class GMMLayer(tf.keras.layers.Layer):
       components = [
         tfp.distributions.MultivariateNormalDiag(loc = self.locs[i], scale_diag = self.scales[i]) for i in range(self.kernel_num)
       ]);
-    return gmm.prob(inputs);
+    return gmm.log_prob(inputs);
   def get_config(self,):
     config = super(GMMLayer, self).get_config();
     config['kernel_num'] = self.kernel_num;
@@ -26,14 +26,8 @@ class GMMLayer(tf.keras.layers.Layer):
   def from_config(cls, config):
     return cls(**config);
 
-def GMM(input_shape, kernel_num = 3):
-  inputs = tf.keras.Input(input_shape); # inputs.shape = (batch, ...)
-  probs = GMMLayer(kernel_num)(inputs); # probs.shape = (batch)
-  log_probs = tf.keras.layers.Lambda(lambda x: tf.math.log(x))(probs); # log_probs.shape = (batch)
-  return tf.keras.Model(inputs = inputs, outputs = log_probs);
-
 def fisher_kernel(kernel_num = 3, dim = 10):
-  gmm = GMM((dim,), kernel_num);
+  gmm = GMMLayer(kernel_num);
   inputs = tf.random.normal(shape = (1,dim,));
   with tf.GradientTape() as g:
     outputs = gmm(inputs); # log p(x)

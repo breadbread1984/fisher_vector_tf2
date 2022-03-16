@@ -3,7 +3,7 @@
 import tensorflow as tf;
 import tensorflow_probability as tfp;
 
-class GMM(tf.keras.layers.Layer):
+class GMMLayer(tf.keras.layers.Layer):
   def __init__(self, kernel_num = 3, **kwargs):
     self.kernel_num = kernel_num;
     super(GMM, self).__init__(**kwargs);
@@ -26,9 +26,19 @@ class GMM(tf.keras.layers.Layer):
   def from_config(cls, config):
     return cls(**config);
 
+def GMM(input_shape, kernel_num = 3):
+  inputs = tf.keras.Input(input_shape); # inputs.shape = (batch, ...)
+  probs = GMMLayer(kernel_num)(inputs); # probs.shape = (batch)
+  log_probs = tf.keras.layers.Lambda(lambda x: tf.math.log(x))(probs); # log_probs.shape = (batch)
+  return tf.keras.Model(inputs = inputs, outputs = log_probs);
+
+def fisher_kernel(kernel_num = 3, dim = 10):
+  gmm = GMM((dim,), kernel_num);
+  inputs = tf.random.normal(loc = 5., scale = 3., shape = (1,dim,));
+  with tf.GradientTape() as g:
+    outputs = gmm(inputs); # log p(x)
+  grads = g.gradient(outputs, gmm.trainable_variables);
+  print(grads);
+
 if __name__ == "__main__":
-  gmm = GMM(3);
-  import numpy as np;
-  inputs = np.random.normal(size = (2,10));
-  probs = gmm(inputs);
-  print(probs.shape)
+  fisher_kernel();

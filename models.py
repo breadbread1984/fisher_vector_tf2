@@ -26,13 +26,15 @@ class GMMLayer(tf.keras.layers.Layer):
   def from_config(cls, config):
     return cls(**config);
 
-def fisher_kernel(kernel_num = 3, dim = 10):
+def get_gradient_vector(inputs, kernel_num = 5):
   gmm = GMMLayer(kernel_num);
-  inputs = tf.random.normal(shape = (1,dim,));
   with tf.GradientTape() as g:
-    outputs = gmm(inputs); # log p(x)
+    outputs = gmm(inputs); # output.shape = (batch,)
+  all_grads = list();
   grads = g.gradient(outputs, gmm.trainable_variables);
-  print(grads);
+  print(grads, all_grads);
 
 if __name__ == "__main__":
-  fisher_kernel();
+  import numpy as np;
+  data = np.random.normal(size = (10,100));
+  get_gradient_vector(data);
